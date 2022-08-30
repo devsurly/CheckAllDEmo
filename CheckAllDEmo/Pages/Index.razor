@@ -1,0 +1,78 @@
+﻿@page "/"
+
+@if (Users != null)
+{
+    <div style="display:grid; grid-template-columns:100px 100px 100px 150px">
+        <div><input type="checkbox" checked="@IsAllSelected" id="SelectAllHeader" @onchange="EventArgs => { CheckAllExpense(IsAllSelected, EventArgs.Value); }" /></div>
+        <div>ID</div>
+        <div>Name</div>
+        <div>Email</div>
+        @foreach (var user in Users)
+        {
+            <div><input type="checkbox" id="@user.Id" checked="@user.IsChecked" @onchange="(e) => OnItemCheck(e, user)" /></div>            
+            <div>@user.Id</div>
+            <div>@user.Name</div>
+            <div>@user.Email</div>
+        }
+    </div>
+}
+
+@code
+{
+    public IEnumerable<User> Users { get; set; }
+    public bool IsAllSelected { get; set; }
+    public bool rowCheck { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(GetUsers);
+
+    }
+
+    public void GetUsers()
+    {
+        Users = new List<User>()
+        {
+            new User() { Id="01", Name = "홍길동", Email="hong.gildong@abc.com" },
+            new User() { Id="02", Name = "선동열", Email="sun@abc.com" },
+            new User() { Id="03", Name = "이순신", Email="sunsin@abc.com" },
+            new User() { Id="04", Name = "세종대왕", Email="leesan@abc.com" },
+        };
+    }
+
+    void CheckAllExpense(bool headerChecked, object checkValue)
+    {
+        bool isChecked = (bool)checkValue;
+        Users.ToList().ForEach(e => e.IsChecked = isChecked);
+    }
+
+    public void OnItemCheck(ChangeEventArgs e, User user)
+    {
+        bool isCheck = Convert.ToBoolean(e.Value);
+
+        IsAllSelected = isCheck;
+
+        user.IsChecked = isCheck;
+
+        foreach (var chkUser in Users)
+        {
+            if (!chkUser.IsChecked)
+            {
+                IsAllSelected = false;
+                break;
+            }
+        }
+
+
+        Users = Users.ToList();
+        StateHasChanged();
+    }
+
+    public class User
+    {
+        public bool IsChecked { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+    }
+}
